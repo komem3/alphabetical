@@ -30,6 +30,9 @@ func run(pass *analysis.Pass) (interface{}, error) {
 
 	inspect.Preorder(nodeFilter, func(n ast.Node) {
 		gendcl := n.(*ast.GenDecl)
+		if gendcl == nil {
+			return
+		}
 
 		var hit bool
 		for _, c := range gendcl.Doc.List {
