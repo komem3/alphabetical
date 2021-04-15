@@ -6,6 +6,11 @@ var (
 	Apple  = "apple" // want "not sort by alpahbet order"
 )
 
+var (
+	Normal = "normal comment"
+	Easy   = "easy comment"
+)
+
 // Alphabetical order
 const (
 	define = "define"
