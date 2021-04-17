@@ -1,13 +1,13 @@
-package alphabetorder_test
+package alphabeticalorder_test
 
 import (
 	"testing"
 
-	"github.com/komem3/alphabetorder"
+	"github.com/komem3/alphabeticalorder"
 	"golang.org/x/tools/go/analysis/analysistest"
 )
 
 func Test(t *testing.T) {
 	testdata := analysistest.TestData()
-	analysistest.Run(t, testdata, alphabetorder.Analyzer, "a")
+	analysistest.Run(t, testdata, alphabeticalorder.Analyzer, "a")
 }

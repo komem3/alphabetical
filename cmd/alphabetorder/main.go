@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/komem3/alphabetorder"
+	"github.com/komem3/alphabeticalorder"
 	"golang.org/x/tools/go/analysis/singlechecker"
 )
 
 func main() {
-	singlechecker.Main(alphabetorder.Analyzer)
+	singlechecker.Main(alphabeticalorder.Analyzer)
 }

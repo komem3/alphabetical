@@ -1,4 +1,4 @@
-module github.com/komem3/alphabetorder
+module github.com/komem3/alphabeticalorder
 
 go 1.16
 

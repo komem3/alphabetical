@@ -5,7 +5,7 @@ import "net/http"
 // Alphabetical order
 var (
 	Banana = "banana"
-	Apple  = "apple" // want "not sort by alphabet order"
+	Apple  = "apple" // want "not sort by alphabetical"
 )
 
 var (
@@ -16,13 +16,13 @@ var (
 // Alphabetical order
 const (
 	define = "define"
-	coin   = "coin" // want "not sort by alphabet order"
+	coin   = "coin" // want "not sort by alphabetical"
 )
 
 // Alphabetical order
 type (
 	final    string
-	elephant string // want "not sort by alphabet order"
+	elephant string // want "not sort by alphabetical"
 )
 
 func f() {
@@ -31,25 +31,25 @@ func f() {
 	// Alphabetical order
 	http.HandleFunc("/b", nil)
 	http.HandleFunc("/c", nil)
-	http.HandleFunc("/a", nil) // want "not sort by alphabet order"
+	http.HandleFunc("/a", nil) // want "not sort by alphabetical"
 
 	{
 		// Alphabetical order
 		http.HandleFunc("/", b)
 		http.HandleFunc("/", c)
-		http.HandleFunc("/", a) // want "not sort by alphabet order"
+		http.HandleFunc("/", a) // want "not sort by alphabetical"
 	}
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		// Alphabetical order
 		http.HandleFunc("/", e())
-		http.HandleFunc("/", d()) // want "not sort by alphabet order"
+		http.HandleFunc("/", d()) // want "not sort by alphabetical"
 	})
 
 	if true {
 		// Alphabetical order
 		http.HandleFunc("/c", nil)
-		http.HandleFunc("/a", nil) // want "not sort by alphabet order"
+		http.HandleFunc("/a", nil) // want "not sort by alphabetical"
 	}
 }
 

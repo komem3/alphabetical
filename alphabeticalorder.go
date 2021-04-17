@@ -1,4 +1,4 @@
-package alphabetorder
+package alphabeticalorder
 
 import (
 	"errors"
@@ -14,19 +14,19 @@ import (
 
 const targetText = "// Alphabetical order"
 
-var Doc = `sort variable by alphabet order
+var Doc = `sort variable by alphabetical order
 // Alphabetical order
 above comment check.
 `
 
 var Analyzer = &analysis.Analyzer{
-	Name:     "alphabetorder",
+	Name:     "alphabeticalorder",
 	Doc:      Doc,
 	Requires: []*analysis.Analyzer{inspect.Analyzer},
 	Run:      run,
 }
 
-var ErrNotAlphabetOrder = errors.New("not sort by alphabet order")
+var ErrNotAlphabeticalOrder = errors.New("not sort by alphabetical")
 
 func run(pass *analysis.Pass) (interface{}, error) {
 	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
@@ -89,7 +89,7 @@ func checkBlock(pass *analysis.Pass, block *ast.BlockStmt, commentMap ast.Commen
 				continue
 			}
 			if beforeName > args {
-				return call.Pos(), ErrNotAlphabetOrder
+				return call.Pos(), ErrNotAlphabeticalOrder
 			}
 			beforeFunc, beforeName = fn, args
 		}
@@ -151,12 +151,12 @@ func checkGenDcl(gendcl *ast.GenDecl) (token.Pos, error) {
 		switch v := spec.(type) {
 		case *ast.ValueSpec:
 			if beforeName > v.Names[0].Name {
-				return spec.Pos(), ErrNotAlphabetOrder
+				return spec.Pos(), ErrNotAlphabeticalOrder
 			}
 			beforeName = v.Names[0].Name
 		case *ast.TypeSpec:
 			if beforeName > v.Name.Name {
-				return spec.Pos(), ErrNotAlphabetOrder
+				return spec.Pos(), ErrNotAlphabeticalOrder
 			}
 			beforeName = v.Name.Name
 		}
