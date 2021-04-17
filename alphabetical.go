@@ -3,7 +3,6 @@ package alphabetical
 import (
 	"errors"
 	"go/ast"
-	"go/token"
 	"strings"
 
 	"golang.org/x/tools/go/analysis"
@@ -37,18 +36,11 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		(*ast.GenDecl)(nil),
 	}
 	inspect.Preorder(nodeFilter, func(n ast.Node) {
-		var (
-			err error
-			pos token.Pos
-		)
 		switch v := n.(type) {
 		case *ast.File:
 			commentMap = ast.NewCommentMap(pass.Fset, v, v.Comments)
 		case *ast.GenDecl:
-			pos, err = checkGenDcl(v)
-			if err != nil {
-				pass.Reportf(pos, err.Error())
-			}
+			checkGenDcl(pass, v)
 		case *ast.BlockStmt:
 			checkBlock(pass, v, commentMap)
 		}
@@ -137,9 +129,9 @@ func checkComment(n ast.Node, commentMap ast.CommentMap) bool {
 	return false
 }
 
-func checkGenDcl(gendcl *ast.GenDecl) (token.Pos, error) {
+func checkGenDcl(pass *analysis.Pass, gendcl *ast.GenDecl) {
 	if gendcl.Doc == nil {
-		return 0, nil
+		return
 	}
 	var hit bool
 	for _, c := range gendcl.Doc.List {
@@ -149,7 +141,7 @@ func checkGenDcl(gendcl *ast.GenDecl) (token.Pos, error) {
 		}
 	}
 	if !hit {
-		return 0, nil
+		return
 	}
 
 	var beforeName string
@@ -157,15 +149,14 @@ func checkGenDcl(gendcl *ast.GenDecl) (token.Pos, error) {
 		switch v := spec.(type) {
 		case *ast.ValueSpec:
 			if beforeName > v.Names[0].Name {
-				return spec.Pos(), ErrNotAlphabeticalOrder
+				pass.Reportf(spec.Pos(), ErrNotAlphabeticalOrder.Error())
 			}
 			beforeName = v.Names[0].Name
 		case *ast.TypeSpec:
 			if beforeName > v.Name.Name {
-				return spec.Pos(), ErrNotAlphabeticalOrder
+				pass.Reportf(spec.Pos(), ErrNotAlphabeticalOrder.Error())
 			}
 			beforeName = v.Name.Name
 		}
 	}
-	return 0, nil
 }

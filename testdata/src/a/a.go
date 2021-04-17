@@ -6,6 +6,7 @@ import "net/http"
 var (
 	Banana = "banana"
 	Apple  = "apple" // want "not sort by alphabetical"
+	Ant    = "ant"   // want "not sort by alphabetical"
 )
 
 var (
