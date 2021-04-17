@@ -92,6 +92,8 @@ func checkBlock(pass *analysis.Pass, block *ast.BlockStmt, commentMap ast.Commen
 				return call.Pos(), ErrNotAlphabeticalOrder
 			}
 			beforeFunc, beforeName = fn, args
+		default:
+			checking = false
 		}
 	}
 	return 0, nil
