@@ -1,4 +1,4 @@
-# alphabeticalorder
+# alphabetical
 
 Check function call and variable declarations are in alphabetical order.
 The target is the statement with `// Alphabetical order` comments.
@@ -16,5 +16,9 @@ func f() {
 	// Alphabetical order
 	http.HandleFunc("/b", nil)
 	http.HandleFunc("/a", nil) // want "not sort by alphabetical"
+
+	// Alphabetical order
+	b(nil, nil)
+	a(nil, nil) // want "not sort by alphabetical"
 }
 ```

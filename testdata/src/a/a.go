@@ -44,13 +44,26 @@ func f() {
 		// Alphabetical order
 		http.HandleFunc("/", e())
 		http.HandleFunc("/", d()) // want "not sort by alphabetical"
+		http.HandleFunc("/", e())
+		print(0)
 	})
 
 	if true {
 		// Alphabetical order
 		http.HandleFunc("/c", nil)
+		http.HandleFunc("/b", nil) // want "not sort by alphabetical"
 		http.HandleFunc("/a", nil) // want "not sort by alphabetical"
 	}
+
+	// Alphabetical order
+	b(nil, nil)
+	a(nil, nil) // want "not sort by alphabetical"
+	e()
+
+	// Alphabetical order
+	e()
+	d() // want "not sort by alphabetical"
+	a(nil, nil)
 }
 
 func a(_ http.ResponseWriter, _ *http.Request) {}

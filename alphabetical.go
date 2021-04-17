@@ -1,4 +1,4 @@
-package alphabeticalorder
+package alphabetical
 
 import (
 	"errors"
@@ -14,13 +14,13 @@ import (
 
 const targetText = "// Alphabetical order"
 
-var Doc = `sort variable by alphabetical order
+var Doc = `sort by alphabetical
 // Alphabetical order
 above comment check.
 `
 
 var Analyzer = &analysis.Analyzer{
-	Name:     "alphabeticalorder",
+	Name:     "alphabetical",
 	Doc:      Doc,
 	Requires: []*analysis.Analyzer{inspect.Analyzer},
 	Run:      run,
@@ -46,19 +46,19 @@ func run(pass *analysis.Pass) (interface{}, error) {
 			commentMap = ast.NewCommentMap(pass.Fset, v, v.Comments)
 		case *ast.GenDecl:
 			pos, err = checkGenDcl(v)
+			if err != nil {
+				pass.Reportf(pos, err.Error())
+			}
 		case *ast.BlockStmt:
-			pos, err = checkBlock(pass, v, commentMap)
+			checkBlock(pass, v, commentMap)
 		}
 
-		if err != nil {
-			pass.Reportf(pos, err.Error())
-		}
 	})
 
 	return nil, nil
 }
 
-func checkBlock(pass *analysis.Pass, block *ast.BlockStmt, commentMap ast.CommentMap) (token.Pos, error) {
+func checkBlock(pass *analysis.Pass, block *ast.BlockStmt, commentMap ast.CommentMap) {
 	var (
 		checking   bool
 		beforeName string
@@ -84,19 +84,21 @@ func checkBlock(pass *analysis.Pass, block *ast.BlockStmt, commentMap ast.Commen
 			}
 
 			fn, args := callName(pass, call)
-			if fn == "" || (beforeFunc != "" && beforeFunc != fn) {
+			if beforeFunc != "" && beforeFunc != fn && beforeName != args {
 				checking = false
 				continue
 			}
-			if beforeName > args {
-				return call.Pos(), ErrNotAlphabeticalOrder
+			if beforeFunc == fn && beforeName > args {
+				pass.Reportf(call.Pos(), ErrNotAlphabeticalOrder.Error())
+			}
+			if beforeName == args && beforeFunc > fn {
+				pass.Reportf(call.Pos(), ErrNotAlphabeticalOrder.Error())
 			}
 			beforeFunc, beforeName = fn, args
 		default:
 			checking = false
 		}
 	}
-	return 0, nil
 }
 
 func callName(pass *analysis.Pass, call *ast.CallExpr) (funcName string, args string) {
@@ -109,7 +111,9 @@ func callName(pass *analysis.Pass, call *ast.CallExpr) (funcName string, args st
 		case *ast.BasicLit:
 			args += strings.Trim(v.Value, "\"/")
 		case *ast.Ident:
-			if v.Name != "nil" {
+			if v.Name == "nil" {
+				args += " "
+			} else {
 				args += v.Name
 			}
 		case *ast.CallExpr:
@@ -117,7 +121,7 @@ func callName(pass *analysis.Pass, call *ast.CallExpr) (funcName string, args st
 			args += fn + as
 		}
 	}
-	return fn.FullName(), args
+	return fn.Name(), args
 }
 
 func checkComment(n ast.Node, commentMap ast.CommentMap) bool {
