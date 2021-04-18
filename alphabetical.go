@@ -29,7 +29,10 @@ var ErrNotAlphabeticalOrder = errors.New("not sort by alphabetical")
 
 func run(pass *analysis.Pass) (interface{}, error) {
 	inspect := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
-	var commentMap ast.CommentMap
+	var (
+		commentMap ast.CommentMap
+		nowPackage string
+	)
 	nodeFilter := []ast.Node{
 		(*ast.File)(nil),
 		(*ast.BlockStmt)(nil),
@@ -39,18 +42,18 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		switch v := n.(type) {
 		case *ast.File:
 			commentMap = ast.NewCommentMap(pass.Fset, v, v.Comments)
+			nowPackage = v.Name.String()
 		case *ast.GenDecl:
 			checkGenDcl(pass, v)
 		case *ast.BlockStmt:
-			checkBlock(pass, v, commentMap)
+			checkBlock(pass, v, commentMap, nowPackage)
 		}
-
 	})
 
 	return nil, nil
 }
 
-func checkBlock(pass *analysis.Pass, block *ast.BlockStmt, commentMap ast.CommentMap) {
+func checkBlock(pass *analysis.Pass, block *ast.BlockStmt, commentMap ast.CommentMap, nowPackage string) {
 	var (
 		checking   bool
 		beforeName string
@@ -75,7 +78,7 @@ func checkBlock(pass *analysis.Pass, block *ast.BlockStmt, commentMap ast.Commen
 				continue
 			}
 
-			fn, args := callName(pass, call)
+			fn, args := callName(pass, call, nowPackage)
 			if beforeFunc != "" && beforeFunc != fn && beforeName != args {
 				checking = false
 				continue
@@ -93,7 +96,7 @@ func checkBlock(pass *analysis.Pass, block *ast.BlockStmt, commentMap ast.Commen
 	}
 }
 
-func callName(pass *analysis.Pass, call *ast.CallExpr) (funcName string, args string) {
+func callName(pass *analysis.Pass, call *ast.CallExpr, nowPackage string) (funcName string, args string) {
 	fn := typeutil.StaticCallee(pass.TypesInfo, call)
 	if fn == nil {
 		return "", ""
@@ -109,11 +112,16 @@ func callName(pass *analysis.Pass, call *ast.CallExpr) (funcName string, args st
 				args += v.Name
 			}
 		case *ast.CallExpr:
-			fn, as := callName(pass, v)
+			fn, as := callName(pass, v, nowPackage)
 			args += fn + as
 		}
 	}
-	return fn.Name(), args
+
+	if fn.Pkg().Name() == nowPackage {
+		return fn.Name(), args
+	}
+	fsplit := strings.Split(fn.FullName(), "/")
+	return fsplit[len(fsplit)-1], args
 }
 
 func checkComment(n ast.Node, commentMap ast.CommentMap) bool {

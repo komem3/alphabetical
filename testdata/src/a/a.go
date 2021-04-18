@@ -1,6 +1,11 @@
 package a
 
-import "net/http"
+import (
+	"bytes"
+	"fmt"
+	"log"
+	"net/http"
+)
 
 // Alphabetical order
 var (
@@ -26,7 +31,21 @@ type (
 	elephant string // want "not sort by alphabetical"
 )
 
-func f() {
+func a(_ http.ResponseWriter, _ *http.Request) {}
+
+func b(_ http.ResponseWriter, _ *http.Request) {}
+
+func c(_ http.ResponseWriter, _ *http.Request) {}
+
+func d() func(_ http.ResponseWriter, _ *http.Request) {
+	return func(_ http.ResponseWriter, _ *http.Request) {}
+}
+
+func e() func(_ http.ResponseWriter, _ *http.Request) {
+	return func(_ http.ResponseWriter, _ *http.Request) {}
+}
+
+func block1() {
 	http.HandleFunc("/z", nil)
 
 	// Alphabetical order
@@ -46,7 +65,7 @@ func f() {
 		http.HandleFunc("/", e())
 		http.HandleFunc("/", d()) // want "not sort by alphabetical"
 		http.HandleFunc("/", e())
-		print(0)
+		fmt.Print(0)
 	})
 
 	if true {
@@ -55,7 +74,9 @@ func f() {
 		http.HandleFunc("/b", nil) // want "not sort by alphabetical"
 		http.HandleFunc("/a", nil) // want "not sort by alphabetical"
 	}
+}
 
+func block2() {
 	// Alphabetical order
 	b(nil, nil)
 	a(nil, nil) // want "not sort by alphabetical"
@@ -65,18 +86,21 @@ func f() {
 	e()
 	d() // want "not sort by alphabetical"
 	a(nil, nil)
-}
 
-func a(_ http.ResponseWriter, _ *http.Request) {}
+	// Alphabetical order
+	fmt.Printf(Banana)
+	fmt.Printf(Apple) // want "not sort by alphabetical"
 
-func b(_ http.ResponseWriter, _ *http.Request) {}
+	// Alphabetical order
+	fmt.Printf(define)
+	fmt.Printf(Ant) // want "not sort by alphabetical"
 
-func c(_ http.ResponseWriter, _ *http.Request) {}
+	// Alphabetical order
+	log.Printf(Apple)
+	fmt.Printf(Apple) // want "not sort by alphabetical"
 
-func d() func(_ http.ResponseWriter, _ *http.Request) {
-	return func(_ http.ResponseWriter, _ *http.Request) {}
-}
-
-func e() func(_ http.ResponseWriter, _ *http.Request) {
-	return func(_ http.ResponseWriter, _ *http.Request) {}
+	b := new(bytes.Buffer)
+	// Alphabetical order
+	b.WriteString(Banana)
+	b.WriteString(Apple) // want "not sort by alphabetical"
 }
